@@ -45,6 +45,30 @@ public class IRRCalUtil {
 	// 割线法,excel算法.gitignore
 
 	// 试位法，线性插值法
+	public static BigDecimal falsePositionCal(List<BigDecimal> cList, BigDecimal accuracy) {
+		BigDecimal a = new BigDecimal("1");
+		BigDecimal b = new BigDecimal("2");
+		BigDecimal c;
+		while (true) {
+//			System.out.println("f(a) : " + falsePositionF(cList, a).toPlainString());
+//			System.out.println("f(b) : " + falsePositionF(cList, b).toPlainString());
+			c = a.multiply(falsePositionF(cList, b)).subtract(b.multiply(falsePositionF(cList, a))).divide(falsePositionF(cList, b).subtract(falsePositionF(cList, a)), 20, RoundingMode.HALF_UP);
+//			System.out.println(c);
+			if (c.subtract(a).abs().compareTo(accuracy) < 0) break;
+			BigDecimal fc = falsePositionF(cList, c);
+			if (fc.compareTo(BigDecimal.ZERO) <= 0) {
+				a = c;
+			} else {
+				b = c;
+			}
+		}
+		return c;
+	}
+
+	private static BigDecimal falsePositionF(List<BigDecimal> cList, BigDecimal x) {
+		return newtonF(cList, x);
+	}
+
 	private static BigDecimal test(List<BigDecimal> cList, BigDecimal x) {
 		BigDecimal sum = BigDecimal.ZERO;
 		for (int i = 0; i< cList.size(); i++) {
@@ -63,9 +87,15 @@ public class IRRCalUtil {
 				new BigDecimal("220"), new BigDecimal("220"));
 		Long start = System.currentTimeMillis();
 //		System.out.println(test(cList, new BigDecimal("1.03263495764132586764")));
-		System.out.println(newtonCal(cList, new BigDecimal("0.000001")));
+		System.out.println("newton : " + newtonCal(cList, new BigDecimal("0.000001")).toPlainString());
 		Long end = System.currentTimeMillis();
 		System.out.println("cost : " + (end - start));
+		start = System.currentTimeMillis();
+		System.out.println("false po : " + falsePositionCal(cList, new BigDecimal("0.000001")).toPlainString());
+		end = System.currentTimeMillis();
+		System.out.println("cost : " + (end - start));
 //		System.out.println(calYear(new BigDecimal("1.03263495764132586764")));
+
+//		System.out.println(calYear(new BigDecimal("1.02")));
 	}
 }
